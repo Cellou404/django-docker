@@ -1,0 +1,45 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v3
+
+      - name: Installer Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Installer les dépendances
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Lancer les tests
+        env:
+          DATABASE_URL: "postgres://postgres:postgres@localhost:5432/postgres"
+        run: |
+          python manage.py test
