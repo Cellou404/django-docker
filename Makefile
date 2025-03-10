@@ -1,50 +1,34 @@
-# Variables
-PYTHON = python
-VENV = venv
-MANAGE = $(VENV)/bin/python manage.py
-
-# Installation
+.PHONY: install
 install:
 	@echo "📦 Installation des dépendances..."
-	python -m venv $(VENV)
-	$(VENV)/bin/pip install -r requirements.txt
+	python -m pip install -r requirements.txt
 
-# Lancer le serveur
+.PHONY: run
 run:
 	@echo "🚀 Démarrage du serveur Django..."
-	$(MANAGE) runserver 0.0.0.0:8000
+	python manage.py runserver 0.0.0.0:8000
 
-# Appliquer les migrations
+.PHONY: migrate
 migrate:
 	@echo "🔄 Application des migrations..."
-	$(MANAGE) migrate
+	python manage migrate
 
-# Créer une migration
+.PHONY: makemigrations
 makemigrations:
 	@echo "📜 Création des migrations..."
-	$(MANAGE) makemigrations
+	python manage.py makemigrations
 
-# Lancer les tests avec pytest et coverage
+.PHONY: test
 test:
 	@echo "🧪 Lancement des tests avec pytest..."
-	$(VENV)/bin/pytest --cov=config --cov-report=term-missing
+	pytest tests --cov=config --cov-report=term-missing
 
-# Lancer un shell Django
+.PHONY: shell
 shell:
 	@echo "🐍 Ouverture du shell Django..."
-	$(MANAGE) shell
+	python manage.py shell
 
-# Vérifier les erreurs avec flake8
-lint:
-	@echo "🔍 Vérification du code avec flake8..."
-	$(VENV)/bin/flake8 app config
-
-# Formater le code avec black
-format:
-	@echo "🎨 Formatage du code avec Black..."
-	$(VENV)/bin/black app config
-
-# Nettoyer les fichiers inutiles
+.PHONY: clean
 clean:
 	@echo "🧹 Nettoyage des fichiers inutiles..."
 	find . -name "*.pyc" -delete
@@ -53,11 +37,12 @@ clean:
 	rm -rf .mypy_cache
 	rm -rf coverage.xml
 
-# Exécuter Docker Compose
-docker-up:
+.PHONY: docker_up
+docker_up:
 	@echo "🐳 Lancement des services Docker..."
-	docker compose up -d
+	docker compose up
 
-docker-down:
+.PHONY: docker_down
+docker_down:
 	@echo "🛑 Arrêt des services Docker..."
 	docker compose down

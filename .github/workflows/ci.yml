@@ -22,6 +22,11 @@ jobs:
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U myuser -d mydb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Récupérer le code
@@ -41,8 +46,17 @@ jobs:
           # source venv/bin/activate
           pip install -r requirements.txt
 
-      - name: Lancer les tests
+      - name: Appliquer les migrations
+        run: |
+          source venv/bin/activate
+          python manage.py migrate
+
+      - name: Lancer les tests avec pytest
         run: |
           export DJANGO_SETTINGS_MODULE=config.settings
-          # source venv/bin/activate
-          python manage.py test
+          pytest --cov=config --cov-report=xml
+
+      - name: Sauvegarder le rapport de couverture
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
